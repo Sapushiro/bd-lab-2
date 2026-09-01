@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends
 from pydantic import BaseModel, ConfigDict
 
 from src.predict import Predictor
+from src.database import Database
 
 class BankNoteFeatures(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -27,6 +28,12 @@ app = FastAPI(
 def get_predictor() -> Predictor:
     return Predictor()
 
+@lru_cache()
+def get_database() -> Database:
+    database = Database()
+    database.initialize()
+    return database
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {
@@ -36,8 +43,11 @@ def health() -> dict[str, str]:
 @app.post("/predict", response_model=PredictionResponse)
 def predict(
         features: BankNoteFeatures,
-        predictor: Annotated[Predictor, Depends(get_predictor)]
+        predictor: Annotated[Predictor, Depends(get_predictor)],
+        database: Annotated[Database, Depends(get_database)]
 ) -> PredictionResponse:
+    features_data = features.model_dump()
+
     predicted_class = predictor.predict(
         features.model_dump()
     )
@@ -47,7 +57,15 @@ def predict(
         1: "forged"
     }
 
+    label = class_names[predicted_class]
+
+    database.save_prediction(
+        features=features_data,
+        prediction=predicted_class,
+        label=label
+    )
+
     return PredictionResponse(
         prediction=predicted_class,
-        label=class_names[predicted_class]
+        label=label
     )

@@ -1,7 +1,9 @@
 import os
 import re
 from datetime import datetime
+from statistics import variance
 
+from scipy.stats import entropy
 from sqlalchemy import (
     DateTime,
     Float,
@@ -13,7 +15,7 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 
 class Base(DeclarativeBase):
@@ -131,3 +133,20 @@ class Database:
     def initialize(self) -> None:
         self.create_database()
         self.create_tables()
+
+    def save_prediction(self, features: dict[str, float], prediction: int, label: str) -> int:
+        prediction_record = Prediction(
+            variance=features["variance"],
+            skewness=features["skewness"],
+            curtosis=features["curtosis"],
+            entropy=features["entropy"],
+            prediction=prediction,
+            label=label
+        )
+
+        with Session(self.engine) as session:
+            session.add(prediction_record)
+            session.commit()
+            session.refresh(prediction_record)
+
+            return prediction_record.id
