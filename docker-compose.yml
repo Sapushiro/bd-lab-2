@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: banknote-api:latest
-    container_name: banknote-api-container
+    container_name: banknote-api-lab2-container
     ports:
       - "8000:8000"
     healthcheck:
