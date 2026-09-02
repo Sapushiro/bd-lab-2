@@ -7,6 +7,8 @@ from pydantic import BaseModel, ConfigDict
 from src.predict import Predictor
 from src.database import Database
 
+from datetime import datetime
+
 class BankNoteFeatures(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -18,6 +20,18 @@ class BankNoteFeatures(BaseModel):
 class PredictionResponse(BaseModel):
     prediction: int
     label: str
+
+class StoredPredictionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    variance: float
+    skewness: float
+    curtosis: float
+    entropy: float
+    prediction: int
+    label: str
+    created_at: datetime
 
 app = FastAPI(
     title="Banknote Authentication API",
@@ -69,3 +83,11 @@ def predict(
         prediction=predicted_class,
         label=label
     )
+
+@app.post("/predictions", response_model=list[StoredPredictionResponse])
+def get_predictions(database: Annotated[Database, Depends(get_database)]) -> list[StoredPredictionResponse]:
+    predictions = database.get_predictions()
+    return [
+        StoredPredictionResponse.model_validate(prediction)
+        for prediction in predictions
+    ]

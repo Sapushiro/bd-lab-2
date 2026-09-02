@@ -13,6 +13,7 @@ from sqlalchemy import (
     create_engine,
     func,
     text,
+    select
 )
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
@@ -150,3 +151,13 @@ class Database:
             session.refresh(prediction_record)
 
             return prediction_record.id
+
+    def get_predictions(self) -> list[Prediction]:
+        with Session(self.engine) as session:
+            predictions = session.scalars(
+                select(Prediction).order_by(
+                    Prediction.id.desc()
+                )
+            ).all()
+
+            return list(predictions)
