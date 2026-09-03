@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: banknote-api:latest
+    image: ${API_IMAGE:-banknote-api:latest}
     container_name: banknote-api-lab2-container
     ports:
       - "8000:8000"
