@@ -90,7 +90,7 @@ jobs:
           python tests/run_scenario.py \
             2>&1 | tee functional-test-results.txt
 
-          python tests/test_database_scenario.py -v \
+          python tests/test_database.py -v \
             2>&1 | tee -a functional-test-results.txt
 
       - name: Upload functional test results
