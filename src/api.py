@@ -84,7 +84,7 @@ def predict(
         label=label
     )
 
-@app.post("/predictions", response_model=list[StoredPredictionResponse])
+@app.get("/predictions", response_model=list[StoredPredictionResponse])
 def get_predictions(database: Annotated[Database, Depends(get_database)]) -> list[StoredPredictionResponse]:
     predictions = database.get_predictions()
     return [
