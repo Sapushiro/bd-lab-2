@@ -3,15 +3,15 @@ from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
 
-from src.api import app, get_predictor
+from src.api import app, get_predictor, get_database
 
 class TestAPI(unittest.TestCase):
     def setUp(self) -> None:
         self.predictor = Mock()
+        self.database = Mock()
 
-        app.dependency_overrides[get_predictor] = (
-            lambda: self.predictor
-        )
+        app.dependency_overrides[get_predictor] = lambda: self.predictor
+        app.dependency_overrides[get_database] = lambda: self.database
 
         self.client = TestClient(app)
 
