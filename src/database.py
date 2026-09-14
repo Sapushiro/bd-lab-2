@@ -1,9 +1,7 @@
 import os
 import re
 from datetime import datetime
-from statistics import variance
 
-from scipy.stats import entropy
 from sqlalchemy import (
     DateTime,
     Float,
